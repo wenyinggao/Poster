@@ -1,0 +1,2 @@
+# devaida-Artisk_lambda_docker_template
+devaida/Artisk_lambda_docker_template
