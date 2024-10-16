@@ -56,3 +56,6 @@ docker push <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-lambda-repo:
 
 7. Test Lambda Function
 - **You can write test case in the function page or setup an URL in lambda configuration and test with it
+
+8. Function URL
+- **In Lambda -> Functions -> your_function -> Configuration -> Function URL, you can create a URL. If you choose AWS_IAM, Only authenticated IAM users and roles can make requests to the function URL.If you choose NONE for Auth type. It will be a public URL which everyone is able to send and receive data.
