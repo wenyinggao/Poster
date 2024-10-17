@@ -59,3 +59,18 @@ docker push <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-lambda-repo:
 
 ## 8. Function URL
 - In Lambda -> Functions -> <your_function> -> Configuration -> Function URL, you can create a URL. If you choose AWS_IAM, Only authenticated IAM users and roles can make requests to the function URL. If you choose NONE for Auth type. It will be a public URL which everyone is able to send and receive data.
+
+## 9. Lambda File Process
+### 9.1 IAM role policy
+- Look for your lambda function role, It locates at <your_function> -> Configuraion -> Permissions -> Role name
+- Click the Role name, add required permission for it. It should have S3 input and output permission (I used AmazonS3FullAccess)
+
+- Create two S3 buckets, one for input and one for output. The whole process should be input file -> input bucket -> lambda function -> output bucket -> output file
+
+### 9.1.1 S3 bucket 
+- you need to set up 2 buckets. One for input and one for output
+- Create a bucket e.g. inputbucket. Go to inputbucket -> Properties -> Event notifications -> Create event notifications. Under Object creation, mark Put(s3:ObjectCreated:Put) and at bottom, choose the lambda function you want to pass the file to.
+- Create another bucket e.g. outputbucket. Nothing more you need to to except let the lambda function save the result file to it and download result from this bucket
+
+### 9.2 Lambda function setup
+- setup your lambda function, make sure it can receive the file from your S3 bucket and save the result to another bucket
