@@ -96,3 +96,5 @@ docker push <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-lambda-repo:
 - In the Deployments tab, click Create new stage.
 - Name the stage (e.g., prod), and click Deploy.
 - After deployment, you will receive a URL to access your API, e.g., https://<api-id>.execute-api.<region>.amazonaws.com/upload.
+
+- Note: REST API have request oayload size limit as 10 MB, HTTP API have request oayload size limit as 6 MB
