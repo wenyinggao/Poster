@@ -60,7 +60,7 @@ docker push <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-lambda-repo:
 ## 8. Function URL
 - In Lambda -> Functions -> <your_function> -> Configuration -> Function URL, you can create a URL. If you choose AWS_IAM, Only authenticated IAM users and roles can make requests to the function URL. If you choose NONE for Auth type. It will be a public URL which everyone is able to send and receive data.
 
-## 9. Lambda File Process
+## 9. Lambda File Process - S3 Bucket
 - Two allow lambda function process with files you will need to create two S3 buckets, one for input and one for output. The whole process should be input file -> input bucket -> lambda function -> output bucket -> output file
 
 ### 9.1 IAM role policy
@@ -74,3 +74,25 @@ docker push <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-lambda-repo:
 
 ### 9.2 Lambda function setup
 - setup your lambda function, make sure it can receive the file from your S3 bucket and save the result to another bucket
+
+## 10. Lambda File Process - API Gateway
+### 10.1 Deploy the Lambda Function
+- Have been mentioned in previous steps
+
+#### 10.2 Create a New API Gateway
+- Go to the API Gateway Console
+- Click Create API
+- Choose HTTP API for lower latency, and click Build
+- Enter a name for your API, e.g., FileUploadAPI, and click Next
+
+#### 10.3 Create a POST Route for File Uploads
+- Under Routes, click Add route.
+- Select POST as the method and enter /upload as the route
+- Click Next and choose Lambda Function as the integration
+- Enter the name of your Lambda function and click Create and attach integration
+
+#### 10.4 Deploy the API
+- go back to the Routes section and click Deploy.
+- In the Deployments tab, click Create new stage.
+- Name the stage (e.g., prod), and click Deploy.
+- After deployment, you will receive a URL to access your API, e.g., https://<api-id>.execute-api.<region>.amazonaws.com/upload.
