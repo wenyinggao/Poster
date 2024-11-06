@@ -8,41 +8,12 @@ import cv2
 from typing import List
 from paddleocr import PaddleOCR
 from requests_toolbelt.multipart import decoder
-import boto3
-import zipfile
-import sys
 
 # Configuration for PaddleOCR model directory in /tmp for AWS Lambda
 custom_model_dir = "/tmp/.paddleocr"
 os.environ['PADDLEOCR_MODEL_DIR'] = custom_model_dir
-s3_client = boto3.client('s3')
 
-# Check if environment is already loaded in /tmp/env
-def is_env_loaded(env_path='/tmp/env'):
-    return os.path.exists(env_path)
-
-# Function to download and extract environment from S3
-def download_and_extract_env(bucket_name, zip_key, extract_path='/tmp/env'):
-    if not is_env_loaded(extract_path):
-        zip_path = '/tmp/environment.zip'
-        print("Downloading environment from S3...")
-        s3_client.download_file(bucket_name, zip_key, zip_path)
-
-        # Extract to /tmp/env and add to sys.path
-        print("Extracting environment...")
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_path)
-
-        # Add extracted libraries to sys.path
-        sys.path.insert(0, extract_path)
-        print("Environment setup completed.")
-    else:
-        print("Environment already loaded.")
-
-# Download and set up environment from S3 (run only once per container)
-download_and_extract_env('artiskimageocrenv', 'environment.zip')
-
-# Initialize PaddleOCR with custom directory after environment setup
+# Initialize PaddleOCR with custom directory
 ocr = PaddleOCR(use_angle_cls=True, lang='en', 
                 det_model_dir=f"{custom_model_dir}/det", 
                 rec_model_dir=f"{custom_model_dir}/rec", 
@@ -93,6 +64,15 @@ def ocr_prediction(image_data: bytes, search_text: str) -> dict:
         return {'err_no': 2, 'err_msg': f"OCR Prediction Error. Data type: {type(image_data)}. Error: {str(e)}"}
 
 
+def parse_json_body(event_body):
+    """Parse JSON body to extract image_url and search_text."""
+    try:
+        body = json.loads(event_body) if isinstance(event_body, str) else event_body
+        return body.get('image_url'), body.get('search_text', '')
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse JSON body. Data type: {type(event_body)}. Error: {str(e)}")
+
+
 def parse_multipart_body(event, content_type):
     """Parse multipart/form-data to extract image data, image_url, and search_text."""
     try:
@@ -126,56 +106,40 @@ def fetch_image_from_url(image_url):
 
 
 def lambda_handler(event, context):
-    """AWS Lambda handler function with enhanced logging for troubleshooting."""
+    """AWS Lambda handler function."""
     try:
-        # Log the incoming event for inspection
-        print("Full Event:", json.dumps(event))
-
         # Default values
         image_url, search_text = None, ""
         image_data = None
 
-        # Retrieve and log Content-Type header
-        content_type = event.get("headers", {}).get("Content-Type", "")
-        print("Received Content-Type:", content_type)
-
-        # Ensure content is multipart/form-data
-        if "multipart/form-data" not in content_type.lower():
-            return {
-                'statusCode': 400, 
-                'body': json.dumps({'err_no': 1, 'err_msg': 'Content-Type must be multipart/form-data'})
-            }
-
-        # Parse form-data
-        image_data, image_url, search_text = parse_multipart_body(event, content_type)
-
-        # Log extracted values
-        print("Parsed Image Data:", "Present" if image_data else "None")
-        print("Parsed Image URL:", image_url)
-        print("Parsed Search Text:", search_text)
+        # Detect content type and parse body
+        content_type = event.get("headers", {}).get("Content-Type", "").lower()
+        
+        # Check if content is multipart/form-data before trying JSON
+        if "multipart/form-data" in content_type:
+            image_data, image_url, search_text = parse_multipart_body(event, content_type)
+        elif event.get('body'):
+            # Parse as JSON if not multipart
+            try:
+                image_url, search_text = parse_json_body(event['body'])
+            except ValueError as e:
+                return {'statusCode': 400, 'body': json.dumps({'err_no': 1, 'err_msg': str(e)})}
 
         # Fetch image data if image_url is provided and image data is not in form
         if image_url and not image_data:
             try:
                 image_data = fetch_image_from_url(image_url)
-                print("Fetched image data from URL.")
             except ValueError as e:
-                print("Error fetching image:", str(e))
                 return {'statusCode': 400, 'body': json.dumps({'err_no': 1, 'err_msg': str(e)})}
 
         # Validate presence of image data
         if not image_data:
-            return {
-                'statusCode': 400, 
-                'body': json.dumps({'err_no': 1, 'err_msg': 'image_url or image (file) is required'})
-            }
+            return {'statusCode': 400, 'body': json.dumps({'err_no': 1, 'err_msg': 'image_url or image (file) is required'})}
 
         # Perform OCR and respond
         result = ocr_prediction(image_data, search_text)
-        print("OCR Result:", json.dumps(result))
         return {'statusCode': 200, 'body': json.dumps(result)}
 
     except Exception as e:
-        # Error handling with full logging
-        print("Unexpected Error:", str(e))
+        # Error handling
         return {'statusCode': 500, 'body': json.dumps({'err_no': 2, 'err_msg': f"Unexpected Error. Data type: {type(event)}. Error: {str(e)}"})}
