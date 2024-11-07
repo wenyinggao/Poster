@@ -1,4 +1,9 @@
 import os
+import sys
+
+# Add local_package to the system path
+sys.path.insert(0, '/local_package')
+
 import json
 import requests
 import regex as re
