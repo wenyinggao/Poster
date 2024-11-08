@@ -1,16 +1,15 @@
-# aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 533267421480.dkr.ecr.us-east-2.amazonaws.com
-# docker build -t ocr .
-# docker tag ocr:latest 533267421480.dkr.ecr.us-east-2.amazonaws.com/ocr:latest
-# docker push 533267421480.dkr.ecr.us-east-2.amazonaws.com/ocr:latest
-#
-#
-#
-# pip download -r requirements.txt -d local_package
-#
-# rm local_package/lxml-5.3.0-cp310-cp310-manylinux_2_28_x86_64.whl
-# pip download lxml==5.3.0 --platform manylinux2014_x86_64 --implementation cp --python-version 3.10 --abi cp310 --only-binary=:all: -d local_package
-# rm local_package/Pillow-10.0.0-cp310-cp310-manylinux_2_28_x86_64.whl
-# pip download Pillow==10.0.0 --platform manylinux2014_x86_64 --implementation cp --python-version 3.10 --abi cp310 --only-binary=:all: -d local_package
-#
-# pip install --no-index --find-links=local_package -r requirements.txt
-#
+aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 533267421480.dkr.ecr.us-east-2.amazonaws.com
+docker build -t ocr .
+docker tag ocr:latest 533267421480.dkr.ecr.us-east-2.amazonaws.com/ocr:latest
+docker push 533267421480.dkr.ecr.us-east-2.amazonaws.com/ocr:latest
+
+
+
+pip download -r requirements.txt -d local_package
+
+rm local_package/lxml-5.3.0-cp310-cp310-manylinux_2_28_x86_64.whl
+pip download lxml==5.3.0 --platform manylinux2014_x86_64 --implementation cp --python-version 3.10 --abi cp310 --only-binary=:all: -d local_package
+rm local_package/Pillow-10.0.0-cp310-cp310-manylinux_2_28_x86_64.whl
+pip download Pillow==10.0.0 --platform manylinux2014_x86_64 --implementation cp --python-version 3.10 --abi cp310 --only-binary=:all: -d local_package
+
+pip install --no-index --find-links=local_package -r requirements.txt

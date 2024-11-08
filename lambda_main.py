@@ -16,8 +16,12 @@ os.environ['PADDLEOCR_BASE_URL'] = '/var/task/local_package/.paddleocr'
 print("PaddleOCR model directory:", os.getenv('PADDLEOCR_MODEL_DIR'))
 # Initialize PaddleOCR with model paths in the writable /tmp directory
 ocr = PaddleOCR(
-    use_angle_cls=True, 
-    lang='en'
+    use_angle_cls=True,
+    lang='en',
+    det_model_dir='/var/task/local_package/.paddleocr/det',
+    rec_model_dir='/var/task/local_package/.paddleocr/rec',
+    cls_model_dir='/var/task/local_package/.paddleocr/cls',
+    enable_mkldnn=False  # Disable MKLDNN to prevent downloads
 )
 
 def decode_image(image_data: bytes):
