@@ -10,15 +10,14 @@ from paddleocr import PaddleOCR
 from requests_toolbelt.multipart import decoder
 
 # Set environment variable for PaddleOCR model directory to a writable directory in Lambda
-os.environ['PADDLEOCR_MODEL_DIR'] = '/tmp/.paddleocr'
+os.environ['PADDLEOCR_MODEL_DIR'] = '/var/task/local_package/.paddleocr'
+os.environ['PADDLEOCR_BASE_URL'] = '/var/task/local_package/.paddleocr'
 
+print("PaddleOCR model directory:", os.getenv('PADDLEOCR_MODEL_DIR'))
 # Initialize PaddleOCR with model paths in the writable /tmp directory
 ocr = PaddleOCR(
     use_angle_cls=True, 
-    lang='en', 
-    det_model_dir='/tmp/.paddleocr/det', 
-    rec_model_dir='/tmp/.paddleocr/rec', 
-    cls_model_dir='/tmp/.paddleocr/cls'
+    lang='en'
 )
 
 def decode_image(image_data: bytes):
