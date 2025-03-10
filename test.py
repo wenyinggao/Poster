@@ -6,10 +6,8 @@ import os
 import time
 
 # Lambda function URL or API Gateway endpoint
-# LAMBDA_URL = "https://7cfg7vocqolqyjvik626nfydru0gbahj.lambda-url.us-east-2.on.aws/"
-LAMBDA_URL = "https://rvnmc0njj7.execute-api.us-east-2.amazonaws.com/ocr_test_delete/test"
-
-
+# LAMBDA_URL = "https://7ix45cy5qixqg6yzlvsyvhbwwu0tsmql.lambda-url.us-east-2.on.aws/ "
+LAMBDA_URL = "https://rvnmc0njj7.execute-api.us-east-2.amazonaws.com/ocr/image_url/search_prediction"
 
 # Sample image file path and search text
 IMAGE_PATH = "images/testocr.png"
